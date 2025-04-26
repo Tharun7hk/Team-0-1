@@ -1,0 +1,59 @@
+# Team-0-1
+#Quantum breach hackathon
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+import numpy as np
+
+
+data = {
+    'text': [
+     "Win money now!",
+        "Your account has been hacked",
+        "Hello friend, how are you?",
+        "Meeting is at 10 am tomorrow",
+        "Congratulations, you've won a prize!",
+        "Let's catch up over coffee",
+        "🎉 Congratulations! You’ve been selected for an exclusive promotion 🎉. You are the lucky winner of a $500 Amazon gift card! 🎁",
+        "Dear user, you've earned a free vacation voucher. Click the link to claim now!",
+        "URGENT: Your account has been suspended. Please verify your identity here.",
+        "Limited time offer! Buy one, get one free on all electronics! 🛍️",
+        "FREE gift card waiting for you! Respond to claim. Limited spots left! 🎉",
+        "🏆 Congrats! You've won a prize worth $1000. Click here to claim now! 💰"
+    ],
+    'label': [1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1] 
+}
+
+
+df = pd.DataFrame(data)
+
+
+X = df['text']
+y = df['label']
+
+vectorizer = CountVectorizer()
+X_counts = vectorizer.fit_transform(X)
+
+
+model = MultinomialNB()
+model.fit(X_counts, y)
+
+
+def predict_spam(message):
+    message_counts = vectorizer.transform([message])
+    prediction = model.predict(message_counts)
+    prob = model.predict_proba(message_counts)
+    spam_probability = prob[0][1]  
+    spam_percentage = np.round(spam_probability * 100, 2)  
+    if prediction[0] == 1:
+        return f"⚠️ This message is SPAM with {spam_percentage}% probability."
+    else:
+        return f"✅ This message seems NOT spam with {100 - spam_percentage}% probability."
+
+
+user_input = input("Enter the WhatsApp message to check: ")
+
+result = predict_spam(user_input)
+print(result)
